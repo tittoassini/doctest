@@ -1,32 +1,34 @@
 {-# LANGUAGE CPP #-}
-module Run (
-  doctest
+
+module Run
+    ( doctest
+    , doctest2
+    , Module(..)
 #ifdef TEST
-, doctestWithOptions
-, Summary
-, expandDirs
+    , doctestWithOptions
+    , Summary
+    , expandDirs
 #endif
-) where
+    ) where
 
 import           Prelude ()
 import           Prelude.Compat
-
 import           Control.Monad (when, unless)
-import           System.Directory (doesFileExist, doesDirectoryExist, getDirectoryContents)
+import           System.Directory (doesFileExist, doesDirectoryExist
+                                 , getDirectoryContents)
 import           System.Environment (getEnvironment)
 import           System.Exit (exitFailure, exitSuccess)
 import           System.FilePath ((</>), takeExtension)
 import           System.IO
 import           System.IO.CodePage (withCP65001)
-
 import qualified Control.Exception as E
 import           Panic
-
 import           PackageDBs
 import           Parse
 import           Options
 import           Runner
 import qualified Interpreter
+import           Location (Located)
 
 -- | Run doctest with given list of arguments.
 --
@@ -46,48 +48,64 @@ doctest args0 = case parseOptions args0 of
   Result (Run warnings args_ magicMode fastMode preserveIt verbose) -> do
     mapM_ (hPutStrLn stderr) warnings
     hFlush stderr
-
     i <- Interpreter.interpreterSupported
-    unless i $ do
-      hPutStrLn stderr "WARNING: GHC does not support --interactive, skipping tests"
-      exitSuccess
-
+    unless i
+      $ do
+        hPutStrLn
+          stderr
+          "WARNING: GHC does not support --interactive, skipping tests"
+        exitSuccess
     args <- case magicMode of
       False -> return args_
-      True -> do
+      True  -> do
         expandedArgs <- concat <$> mapM expandDirs args_
         packageDBArgs <- getPackageDBArgs
         addDistArgs <- getAddDistArgs
         return (addDistArgs $ packageDBArgs ++ expandedArgs)
-
-    r <- doctestWithOptions fastMode preserveIt verbose args `E.catch` \e -> do
-      case fromException e of
-        Just (UsageError err) -> do
-          hPutStrLn stderr ("doctest: " ++ err)
-          hPutStrLn stderr "Try `doctest --help' for more information."
-          exitFailure
-        _ -> E.throwIO e
+    r <- doctestWithOptions fastMode preserveIt verbose args
+      `E.catch` \e -> do
+        case fromException e of
+          Just (UsageError err) -> do
+            hPutStrLn stderr ("doctest: " ++ err)
+            hPutStrLn stderr "Try `doctest --help' for more information."
+            exitFailure
+          _ -> E.throwIO e
     when (not $ isSuccess r) exitFailure
+
+doctest2 :: [String] -> IO ([Module [Located DocTest]])
+doctest2 args0 = case parseOptions args0 of
+  Output _ -> error "Unexpected"
+  Result (Run warnings args_ magicMode _ _ _) -> do
+    mapM_ (hPutStrLn stderr) warnings
+    hFlush stderr
+    args <- case magicMode of
+      False -> return args_
+      True  -> do
+        expandedArgs <- concat <$> mapM expandDirs args_
+        packageDBArgs <- getPackageDBArgs
+        addDistArgs <- getAddDistArgs
+        return (addDistArgs $ packageDBArgs ++ expandedArgs)
+    getDocTests args
 
 -- | Expand a reference to a directory to all .hs and .lhs files within it.
 expandDirs :: String -> IO [String]
 expandDirs fp0 = do
-    isDir <- doesDirectoryExist fp0
-    if isDir
-        then findHaskellFiles fp0
-        else return [fp0]
+  isDir <- doesDirectoryExist fp0
+  if isDir
+    then findHaskellFiles fp0
+    else return [fp0]
   where
     findHaskellFiles dir = do
-        contents <- getDirectoryContents dir
-        concat <$> mapM go (filter (not . hidden) contents)
+      contents <- getDirectoryContents dir
+      concat <$> mapM go (filter (not . hidden) contents)
       where
         go name = do
-            isDir <- doesDirectoryExist fp
-            if isDir
-                then findHaskellFiles fp
-                else if isHaskellFile fp
-                        then return [fp]
-                        else return []
+          isDir <- doesDirectoryExist fp
+          if isDir
+            then findHaskellFiles fp
+            else if isHaskellFile fp
+                 then return [fp]
+                 else return []
           where
             fp = dir </> name
 
@@ -100,34 +118,33 @@ expandDirs fp0 = do
 -- directory, if present.
 getAddDistArgs :: IO ([String] -> [String])
 getAddDistArgs = do
-    env <- getEnvironment
-    let dist =
-            case lookup "HASKELL_DIST_DIR" env of
-                Nothing -> "dist"
-                Just x -> x
-        autogen = dist ++ "/build/autogen/"
-        cabalMacros = autogen ++ "cabal_macros.h"
-
-    dirExists <- doesDirectoryExist autogen
-    if dirExists
-        then do
-            fileExists <- doesFileExist cabalMacros
-            return $ \rest ->
-                  concat ["-i", dist, "/build/autogen/"]
-                : "-optP-include"
-                : (if fileExists
-                    then (concat ["-optP", dist, "/build/autogen/cabal_macros.h"]:)
-                    else id) rest
-        else return id
+  env <- getEnvironment
+  let dist = case lookup "HASKELL_DIST_DIR" env of
+        Nothing -> "dist"
+        Just x  -> x
+      autogen = dist ++ "/build/autogen/"
+      cabalMacros = autogen ++ "cabal_macros.h"
+  dirExists <- doesDirectoryExist autogen
+  if dirExists
+    then do
+      fileExists <- doesFileExist cabalMacros
+      return
+        $ \rest -> concat ["-i", dist, "/build/autogen/"]
+        :"-optP-include"
+        :(if fileExists
+          then (concat ["-optP", dist, "/build/autogen/cabal_macros.h"]:)
+          else id)
+          rest
+    else return id
 
 isSuccess :: Summary -> Bool
 isSuccess s = sErrors s == 0 && sFailures s == 0
 
 doctestWithOptions :: Bool -> Bool -> Bool -> [String] -> IO Summary
 doctestWithOptions fastMode preserveIt verbose args = do
-
   -- get examples from Haddock comments
   modules <- getDocTests args
-
-  Interpreter.withInterpreter args $ \repl -> withCP65001 $ do
-    runModules fastMode preserveIt verbose repl modules
+  Interpreter.withInterpreter args
+    $ \repl -> withCP65001
+    $ do
+      runModules fastMode preserveIt verbose repl modules

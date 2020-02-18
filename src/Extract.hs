@@ -78,7 +78,7 @@ data Module a = Module {
   moduleName    :: String
 , moduleSetup   :: Maybe a
 , moduleContent :: [a]
-} deriving (Eq, Functor)
+} deriving (Eq, Functor,Show)
 
 instance NFData a => NFData (Module a) where
   rnf (Module name setup content) = name `deepseq` setup `deepseq` content `deepseq` ()
