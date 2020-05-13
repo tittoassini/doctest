@@ -1,50 +1,53 @@
-name:             doctest
-version:          0.16.2
-synopsis:         Test interactive Haskell examples
+name: doctest
+version: 0.16.3.1
+synopsis: Test interactive Haskell examples
 description: |
   The doctest program checks examples in source code comments.  It is modeled
   after doctest for Python (<http://docs.python.org/library/doctest.html>).
 
   Documentation is at <https://github.com/sol/doctest#readme>.
-category:         Testing
-license:          MIT
-copyright:        (c) 2009-2018 Simon Hengel
-author:           Simon Hengel <sol@typeful.net>
-maintainer:       quasicomputational <quasicomputational@gmail.com>
-
+category: Testing
+license: MIT
+copyright: (c) 2009-2018 Simon Hengel
+author: Simon Hengel <sol@typeful.net>
+maintainer: quasicomputational <quasicomputational@gmail.com>
 
 github: sol/doctest
 
 extra-source-files:
-- example/**/*
-- test/parse/**/*
-- test/extract/**/*
-- test/integration/**/*
-- test/sandbox/*
-- CHANGES
-- README.markdown
+  - example/**/*
+  - test/parse/**/*
+  - test/extract/**/*
+  - test/integration/**/*
+  - test/sandbox/*
+  - CHANGES
+  - README.markdown
 
 ghc-options: -Wall
 
 dependencies:
-- base >= 4.5 && < 5
-- base-compat >= 0.7.0
-- ghc >= 7.0 && < 8.9
-- syb >= 0.3
-- code-page >= 0.1
-- deepseq
-- directory
-- filepath
-- process
-- ghc-paths >= 0.1.0.9
-- transformers
+  - base >= 4.5 && < 5
+  - base-compat >= 0.7.0
+  - ghc >= 7.0 && < 8.9
+  - syb >= 0.3
+  - code-page >= 0.1
+  - deepseq
+  - directory
+  - filepath
+  - process
+  - ghc-paths >= 0.1.0.9
+  - transformers
+  - filemanip   >=0.3.6.3
+  - filepath
+  - megaparsec
+  - text
 
 library:
   source-dirs:
-  - src
-  - ghci-wrapper/src
+    - src
+    - ghci-wrapper/src
   exposed-modules:
-  - Test.DocTest
+    - Test.DocTest
 
 executable:
   main: Main.hs
@@ -63,13 +66,13 @@ tests:
       - ghci-wrapper/src
     c-sources: test/integration/with-cbits/foo.c
     dependencies:
-    - HUnit
-    - hspec         >= 2.3.0
-    - QuickCheck    >= 2.13.1
-    - stringbuilder >= 0.4
-    - silently      >= 1.2.4
-    - setenv
-    - mockery
+      - HUnit
+      - hspec         >= 2.3.0
+      - QuickCheck    >= 2.13.1
+      - stringbuilder >= 0.4
+      - silently      >= 1.2.4
+      - setenv
+      - mockery
 
   doctests:
     main: doctests.hs

@@ -72,6 +72,7 @@ doctest args0 = case parseOptions args0 of
           _ -> E.throwIO e
     when (not $ isSuccess r) exitFailure
 
+-- Returns a list of modules and their tests
 doctest2 :: [String] -> IO ([Module [Located DocTest]])
 doctest2 args0 = case parseOptions args0 of
   Output _ -> error "Unexpected"

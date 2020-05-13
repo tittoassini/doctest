@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c49494d6a77aec3f741c557db5db5fecb5c705acb3a4d36aad26c6b77921946f
+-- hash: bc06bc5c944a15a7d5d32835eb74de1eed61b194f30bd450f7c3473a90de249b
 
 name:           doctest
 version:        0.16.3.1
@@ -116,6 +116,7 @@ library
       Test.DocTest
   other-modules:
       Extract
+      Generate
       GhcUtil
       Interpreter
       Location
@@ -130,25 +131,21 @@ library
       Util
       Language.Haskell.GhciWrapper
       Paths_doctest
-      Generate
-
   build-depends:
       base >=4.5 && <5
     , base-compat >=0.7.0
     , code-page >=0.1
     , deepseq
     , directory
+    , filemanip >=0.3.6.3
     , filepath
     , ghc >=7.0 && <8.9
     , ghc-paths >=0.1.0.9
+    , megaparsec
     , process
     , syb >=0.3
-    , transformers
-    , filemanip   >=0.3.6.3
-    , filepath
-    , megaparsec
     , text
-
+    , transformers
   default-language: Haskell2010
 
 executable doctest
@@ -165,11 +162,14 @@ executable doctest
     , deepseq
     , directory
     , doctest
+    , filemanip >=0.3.6.3
     , filepath
     , ghc >=7.0 && <8.9
     , ghc-paths >=0.1.0.9
+    , megaparsec
     , process
     , syb >=0.3
+    , text
     , transformers
   default-language: Haskell2010
 
@@ -186,11 +186,14 @@ test-suite doctests
     , deepseq
     , directory
     , doctest
+    , filemanip >=0.3.6.3
     , filepath
     , ghc >=7.0 && <8.9
     , ghc-paths >=0.1.0.9
+    , megaparsec
     , process
     , syb >=0.3
+    , text
     , transformers
   default-language: Haskell2010
 
@@ -212,6 +215,7 @@ test-suite spec
       SandboxSpec
       UtilSpec
       Extract
+      Generate
       GhcUtil
       Interpreter
       Location
@@ -244,15 +248,18 @@ test-suite spec
     , code-page >=0.1
     , deepseq
     , directory
+    , filemanip >=0.3.6.3
     , filepath
     , ghc >=7.0 && <8.9
     , ghc-paths >=0.1.0.9
     , hspec >=2.3.0
+    , megaparsec
     , mockery
     , process
     , setenv
     , silently >=1.2.4
     , stringbuilder >=0.4
     , syb >=0.3
+    , text
     , transformers
   default-language: Haskell2010
