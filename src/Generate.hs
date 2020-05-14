@@ -29,7 +29,7 @@ import           Parse
 genTests :: [String] -> [String] -> IO ()
 genTests opts files = do
   mdls <- doctest2 $ opts ++ files -- "-DETA"
-  print mdls
+  -- print mdls
   testAll mdls
   mapM_ testFile mdls
 
