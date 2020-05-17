@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings
-             , NoMonomorphismRestriction, FlexibleContexts, ViewPatterns #-}
+             , NoMonomorphismRestriction, FlexibleContexts, ViewPatterns ,CPP #-}
 
 module Generate
   ( genTests
