@@ -24,6 +24,10 @@ import           Location
 import           Extract                        ( Module(..) )
 import           Parse
 
+#if ! MIN_VERSION_base(4,11,0)
+import           Data.Semigroup((<>))
+#endif
+
 -- import           System.FilePath.Find
 -- "--verbose", 
 genTests :: [String] -> [String] -> IO ()
