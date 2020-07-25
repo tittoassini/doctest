@@ -114,9 +114,10 @@ library
       ghci-wrapper/src
   exposed-modules:
       Test.DocTest
-  other-modules:
-      Extract
+      Run
       Generate
+      Extract
+  other-modules:
       GhcUtil
       Interpreter
       Location
@@ -124,7 +125,6 @@ library
       PackageDBs
       Parse
       Property
-      Run
       Runner
       Runner.Example
       Sandbox
